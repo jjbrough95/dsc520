@@ -1,0 +1,136 @@
+---
+title: "11.2 Exercise"
+author: "Jed Brough"
+date: "6/5/2021"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+```
+### 1)
+
+## a)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+setwd("~/Downloads")
+library(caret)
+library(tidyverse)
+binary <- read.csv("binary-classifier-data.csv")
+trinary <- read.csv("trinary-classifier-data.csv")
+binary$label <- factor(binary$label)
+trinary$label <- factor(trinary$label)
+qplot(binary$x,binary$y,col=binary$label, main = "Binary data")
+qplot(trinary$x,trinary$y,col=trinary$label, main = "Trinary data")
+```
+
+## b)
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+binary.index <- createDataPartition(binary$label, p=0.75, list = FALSE)
+binary.train <- binary[binary.index,]
+binary.test <- binary[-binary.index,]
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+binary_knn <- train(
+  label ~ ., data = binary.train, method="knn", 
+  trControl = trctrl, 
+  preProcess = c("center","scale"),
+  tuneLength = 10)
+plot(binary_knn, main = "Binary data")
+
+trinary.index <- createDataPartition(trinary$label, p=0.75, list = FALSE)
+trinary.train <- trinary[trinary.index,]
+trinary.test <- trinary[-trinary.index,]
+
+trctrl <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+trinary_knn <- train(
+  label ~ ., data = trinary.train, method="knn", 
+  trControl = trctrl, 
+  preProcess = c("center","scale"),
+  tuneLength = 10)
+plot(trinary_knn, main = "Trinary data")
+```
+
+## c)
+No I don't think a linear classifier would work well on either of these datasets becausethere isn't any way that a single line could be drawn through the data that could accurately split the points by their label with any accuracy.
+
+
+
+### 2)
+
+## a)
+Plot the dataset using a scatter plot.
+```{r echo=FALSE, message=FALSE}
+setwd("~/Downloads")
+library(tidyverse)
+clusters <- read.csv("clustering-data.csv")
+qplot(x,y,data = clusters)
+```
+
+## b)
+Fit the dataset using the k-means algorithm from k=2 to k=12 create a scatter plot of the resultant clusters for each value of k.
+
+```{r echo=FALSE}
+kmean_mod <- kmeans(clusters,2)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "2 clusters")
+
+kmean_mod <- kmeans(clusters,3)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "3 clusters")
+
+kmean_mod <- kmeans(clusters,4)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "4 clusters")
+
+kmean_mod <- kmeans(clusters,5)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "5 clusters")
+
+kmean_mod <- kmeans(clusters,6)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "6 clusters")
+
+kmean_mod <- kmeans(clusters,7)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "7 clusters")
+
+kmean_mod <- kmeans(clusters,8)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "8 clusters")
+
+kmean_mod <- kmeans(clusters,9)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "9 clusters")
+
+kmean_mod <- kmeans(clusters,10)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "10 clusters")
+
+kmean_mod <- kmeans(clusters,11)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "11 clusters")
+
+kmean_mod <- kmeans(clusters,12)
+clusters$cluster <- as.factor(kmean_mod$cluster)
+qplot(x,y,col=cluster,data = clusters, main = "12 clusters")
+
+```
+
+## b)
+As k-means is an unsupervised algorithm, you cannot compute the accuracy as there are no correct values to compare the output to. Instead, you will use the average distance from the center of each cluster as a measure of how well the model fits the data. To calculate this metric, simply compute the distance of each data point to the center of the cluster it is assigned to and take the average value of all of those distances.
+```{r echo=FALSE}
+wssplot <- function(data, nc=15, seed=123){
+               wss <- (nrow(data)-1)*sum(apply(data,2,var))
+               for (i in 2:nc){
+                    set.seed(seed)
+                    wss[i] <- sum(kmeans(data, centers=i)$withinss)}
+                plot(1:nc, wss, type="b", xlab="Number of groups",
+                     ylab="Sum of squares within a group")}
+
+wssplot(clusters, nc = 20)
+```
+
